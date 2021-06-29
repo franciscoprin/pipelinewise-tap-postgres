@@ -118,6 +118,9 @@ AND has_column_privilege(pg_class.oid, attname, 'SELECT') = true """
         for row in cur.fetchall():
             row_count, is_view, schema_name, table_name, *col_info = row
 
+            old_schema_name = schema_name
+            schema_name = 'default'
+
             if table_info.get(schema_name) is None:
                 table_info[schema_name] = {}
 
@@ -127,6 +130,14 @@ AND has_column_privilege(pg_class.oid, attname, 'SELECT') = true """
             col_name = col_info[0]
 
             table_info[schema_name][table_name]['columns'][col_name] = Column(*col_info)
+
+            if old_schema_name != 'default':
+                col_info = ['__tenant', None, 'character varying', 255, None, None, False, False]
+                if old_schema_name.isdigit():
+                    col_info = ['__tenant', True, 'bigint', None, 64, 0, False, False]
+
+                col_name = col_info[0]
+                table_info[schema_name][table_name]['columns'][col_name] = Column(*col_info)
 
         return table_info
 
