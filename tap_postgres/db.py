@@ -183,10 +183,16 @@ def selected_row_to_singer_message(stream, row, version, columns, time_extracted
         row_to_persist += (cleaned_elem,)
 
     rec = dict(zip(columns, row_to_persist))
+    schema_name = md_map.get((), {}).get('schema-name')
+    new_generic_map = {
+        (): {
+            'schema-name': 'default',
+        }
+    }
 
     return singer.RecordMessage(
-        stream=calculate_destination_stream_name(stream, md_map),
-        record=rec,
+        stream=calculate_destination_stream_name(stream, new_generic_map),
+        record={"__tenant": schema_name, **rec},
         version=version,
         time_extracted=time_extracted)
 

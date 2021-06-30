@@ -189,6 +189,19 @@ def sync_traditional_stream(conn_config, stream, state, sync_method, end_lsn):
         raise Exception("unknown sync method {} for stream {}".format(sync_method, stream['tap_stream_id']))
 
     state = singer.set_currently_syncing(state, None)
+    # NOTE: in case that you need to unified the state.
+    # new_state = singer.StateMessage(value=copy.deepcopy(state))
+    # new_bookmark = {}
+    # for stream_name, replication_obj in new_state.value['bookmarks'].items():
+    #     schema, table_name = stream_name.split('-')
+
+    #     if new_bookmark.get(table_name) == None:
+    #         new_bookmark[table_name] = {}
+
+    #     new_bookmark[table_name][schema] = replication_obj
+    # new_state.value['bookmarks'] = new_bookmark
+
+    # singer.write_message(new_state)
     singer.write_message(singer.StateMessage(value=copy.deepcopy(state)))
     return state
 
